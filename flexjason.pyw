@@ -10,6 +10,9 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 from pathlib import Path
 import os
+
+# suppression of stout and stderr messages
+# uncertain if this is necesssary - claudes recommendation
 os.environ["QT_LOGGING_RULES"] = "*.debug=false;qt.qpa.*=false"
 os.environ["LIBGL_ALWAYS_SOFTWARE"] = "1"
 os.environ["EGL_LOG_LEVEL"] = "fatal"
@@ -65,7 +68,7 @@ while  bootloader:
         time.sleep(0.2)
 
 
-# launch app in webview window
+# launch app in webview window & destroy splash
 splash.destroy()
 webview.create_window("Flexible Jason", f"http://localhost:{port}" )
 webview.start(gui ="qt")
