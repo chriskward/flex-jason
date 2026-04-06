@@ -1,3 +1,6 @@
-# Datasets stage logic
-# This module will contain the processing functions for the Datasets stage.
-# Called from the /datasets page route in main.py.
+from nicegui import ui
+
+
+def render(container):
+    with container:
+        ui.label("Datasets").classes("text-h4 q-pa-md")

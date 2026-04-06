@@ -1,3 +1,6 @@
-# Variables stage logic
-# This module will contain the processing functions for the Variables stage.
-# Called from the /variables page route in main.py.
+from nicegui import ui
+
+
+def render(container):
+    with container:
+        ui.label("Variables").classes("text-h4 q-pa-md")

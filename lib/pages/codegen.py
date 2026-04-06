@@ -1,3 +1,6 @@
-# Code Generation stage logic
-# This module will contain the processing functions for the Code Generation stage.
-# Called from the /codegen page route in main.py.
+from nicegui import ui
+
+
+def render(container):
+    with container:
+        ui.label("Code Gen").classes("text-h4 q-pa-md")

@@ -1,3 +1,6 @@
-# Settings stage logic
-# This module will contain the processing functions for the Settings stage.
-# Called from the /settings page route in main.py.
+from nicegui import ui
+
+
+def render(container):
+    with container:
+        ui.label("Settings").classes("text-h4 q-pa-md")

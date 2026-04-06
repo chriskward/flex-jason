@@ -1,3 +1,6 @@
-# Derivations stage logic
-# This module will contain the processing functions for the Derivations stage.
-# Called from the /derivations page route in main.py.
+from nicegui import ui
+
+
+def render(container):
+    with container:
+        ui.label("Derivations").classes("text-h4 q-pa-md")
