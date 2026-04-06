@@ -9,8 +9,7 @@ from pages import filemgr, datasets, variables, derivations, codegen, englishgen
 pipeline = {}
 
 # -- logo ------------------------------------------------------------------
-img = Path(__file__).parent.parent / "assets" / "jason_logo.svg"
-logo_svg = img.read_text()
+logo_path = Path(__file__).parent.parent / "assets" / "veramed.png"
 
 # -- navigation definition ------------------------------------------------
 NAV_ITEMS = [
@@ -58,7 +57,9 @@ def index():
     with ui.left_drawer(value=True, fixed=True, bordered=True).classes("bg-grey-2").style(
         "padding: 0;"
     ).props("width=175"):
-        ui.html(logo_svg).style("width: 130px; padding: 12px 8px 8px 8px;")
+        ui.image(str(logo_path)).style(
+            "width: 100%; padding: 12px 16px 8px 16px; box-sizing: border-box;"
+        )
 
         for i, item in enumerate(NAV_ITEMS):
             if i in DIVIDER_AFTER:
