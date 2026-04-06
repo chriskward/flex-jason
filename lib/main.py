@@ -1,6 +1,5 @@
-from nicegui import ui, app
+from nicegui import ui
 from pathlib import Path
-import base64
 
 # -- shared pipeline state ------------------------------------------------
 # Each stage reads from / writes to this dict.  Because NiceGUI runs in a
@@ -9,21 +8,19 @@ pipeline = {}
 
 # -- logo ------------------------------------------------------------------
 img = Path(__file__).parent.parent / "assets" / "jason_logo.svg"
-with open(img, "rb") as f:
-    logo_b64 = base64.b64encode(f.read()).decode()
-logo_data_uri = f"data:image/svg+xml;base64,{logo_b64}"
+logo_svg = img.read_text()
 
 # -- navigation definition ------------------------------------------------
 NAV_ITEMS = [
-    {"path": "/",             "label": "File Manager",    "icon": "create_new_folder"},
-    {"path": "/datasets",     "label": "Datasets",        "icon": "library_books"},
+    {"key": "filemgr",      "label": "File Manager",    "icon": "create_new_folder"},
+    {"key": "datasets",     "label": "Datasets",        "icon": "library_books"},
     # --- divider ---
-    {"path": "/variables",    "label": "Variables",        "icon": "data_object"},
-    {"path": "/derivations",  "label": "Derivations",     "icon": "account_tree"},
+    {"key": "variables",    "label": "Variables",        "icon": "data_object"},
+    {"key": "derivations",  "label": "Derivations",     "icon": "account_tree"},
     # --- divider ---
-    {"path": "/codegen",      "label": "Code Generation", "icon": "code"},
-    {"path": "/descriptions", "label": "Descriptions",    "icon": "chat_bubble_outline"},
-    {"path": "/settings",     "label": "Settings",        "icon": "settings"},
+    {"key": "codegen",      "label": "Code Generation", "icon": "code"},
+    {"key": "descriptions", "label": "Descriptions",    "icon": "chat_bubble_outline"},
+    {"key": "settings",     "label": "Settings",        "icon": "settings"},
     # --- divider ---
 ]
 
@@ -31,66 +28,86 @@ NAV_ITEMS = [
 DIVIDER_AFTER = {1, 3, 6}
 
 
-def sidebar() -> None:
-    """Render the shared sidebar with logo and navigation links."""
-    with ui.left_drawer(value=True, fixed=True, bordered=True).classes("bg-white").style(
-        "width: 200px; min-width: 200px; max-width: 200px; padding: 0;"
-    ):
-        # logo
-        ui.image(logo_data_uri).style("width: 150px; padding: 16px 16px 8px 16px;")
+# -- page content renderers -----------------------------------------------
+# Each function receives the content container and populates it.
+# Expand these as pipeline stages are built out.
 
-        # nav links
+def render_filemgr(container):
+    with container:
+        ui.label("File Manager").classes("text-h4 q-pa-md")
+
+
+def render_datasets(container):
+    with container:
+        ui.label("Datasets").classes("text-h4 q-pa-md")
+
+
+def render_variables(container):
+    with container:
+        ui.label("Variables").classes("text-h4 q-pa-md")
+
+
+def render_derivations(container):
+    with container:
+        ui.label("Derivations").classes("text-h4 q-pa-md")
+
+
+def render_codegen(container):
+    with container:
+        ui.label("Code Generation").classes("text-h4 q-pa-md")
+
+
+def render_descriptions(container):
+    with container:
+        ui.label("Descriptions").classes("text-h4 q-pa-md")
+
+
+def render_settings(container):
+    with container:
+        ui.label("Settings").classes("text-h4 q-pa-md")
+
+
+PAGE_RENDERERS = {
+    "filemgr": render_filemgr,
+    "datasets": render_datasets,
+    "variables": render_variables,
+    "derivations": render_derivations,
+    "codegen": render_codegen,
+    "descriptions": render_descriptions,
+    "settings": render_settings,
+}
+
+
+# -- single-page layout ---------------------------------------------------
+@ui.page("/")
+def index():
+    ui.colors(primary="#C066B0")
+
+    # content area — cleared and repopulated on navigation
+    content = ui.column().classes("w-full")
+
+    def navigate(key: str):
+        content.clear()
+        renderer = PAGE_RENDERERS.get(key, render_filemgr)
+        renderer(content)
+
+    # sidebar — created once, never redrawn
+    with ui.left_drawer(value=True, fixed=True, bordered=True).classes("bg-grey-2").style(
+        "padding: 0;"
+    ).props("width=150"):
+        ui.html(logo_svg).style("width: 130px; padding: 12px 8px 8px 8px;")
+
         for i, item in enumerate(NAV_ITEMS):
             if i in DIVIDER_AFTER:
                 ui.separator().classes("my-2")
 
-            with ui.element("a").props(f'href="{item["path"]}"').classes(
-                "flex items-center gap-2 px-4 py-2 no-underline text-grey-8 hover:bg-grey-2"
-            ).style("text-decoration: none;"):
+            link = ui.element("div").classes(
+                "flex items-center gap-2 px-4 py-2 text-grey-8 hover:bg-grey-3 cursor-pointer"
+            ).style("text-decoration: none;")
+            with link:
                 ui.icon(item["icon"]).classes("text-lg")
                 ui.label(item["label"]).classes("text-sm")
+            link.on("click", lambda _e, key=item["key"]: navigate(key))
 
-
-def page_layout(title: str):
-    """Common page wrapper: header + sidebar + titled content area."""
-    ui.colors(primary="#C066B0")
-    with ui.header(elevated=True).classes("bg-white text-grey-9 q-py-xs").style("height: 48px;"):
-        ui.label("Flexible Jason").classes("text-h6")
-    sidebar()
-    ui.label(title).classes("text-h4 q-pa-md")
-
-
-# -- pages (stubs — each will grow into a pipeline stage) ------------------
-@ui.page("/")
-def page_filemgr():
-    page_layout("File Manager")
-
-
-@ui.page("/datasets")
-def page_datasets():
-    page_layout("Datasets")
-
-
-@ui.page("/variables")
-def page_variables():
-    page_layout("Variables")
-
-
-@ui.page("/derivations")
-def page_derivations():
-    page_layout("Derivations")
-
-
-@ui.page("/codegen")
-def page_codegen():
-    page_layout("Code Generation")
-
-
-@ui.page("/descriptions")
-def page_descriptions():
-    page_layout("Descriptions")
-
-
-@ui.page("/settings")
-def page_settings():
-    page_layout("Settings")
+    # render the default page
+    render_filemgr(content)
