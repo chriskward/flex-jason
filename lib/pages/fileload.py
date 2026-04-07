@@ -47,7 +47,7 @@ def _open_file_dialog() -> str:
     return path
 
 
-def render(container, pipeline):
+def render(container, settings_obj):
     selected_files: dict[int, str] = {}
     card_counter = {'next': 0}
     expand_holder = {'card': None}
@@ -104,13 +104,18 @@ def render(container, pipeline):
 
     def _on_done():
         paths = list(selected_files.values())
-        pipeline['selected_files'] = paths
-        ui.notify(f'{len(paths)} file(s) selected')
+        settings_obj.clear_files()
+        for p in paths:
+            settings_obj.add_file(p)
+        settings_obj.save()
+        ui.notify(f'{len(paths)} file(s) saved to settings')
 
     def _on_clear():
         selected_files.clear()
         card_counter['next'] = 0
         expand_holder['card'] = None
+        settings_obj.clear_files()
+        settings_obj.save()
         grid_holder['ref'].clear()
         with grid_holder['ref']:
             for _ in range(2):

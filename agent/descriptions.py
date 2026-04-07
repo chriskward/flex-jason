@@ -1,10 +1,10 @@
-"""Agent: Dependencies stage.
+"""Agent: Descriptions stage.
 
 Accepts a config dict (files + LLM settings) and a pipeline dict
 (accumulated processing state).  Returns an updated pipeline dict.
 
 Can be run standalone:
-    python -m agent.dependencies config.yaml pipeline.yaml
+    python -m agent.descriptions config.yaml pipeline.yaml
 """
 
 import argparse
@@ -16,7 +16,7 @@ from utils import load_yaml_as_json, save_json_as_yaml
 
 
 def run(config: dict, pipeline: dict) -> dict:
-    """Execute the Dependencies stage.
+    """Execute the Descriptions stage.
 
     Parameters
     ----------
@@ -28,14 +28,14 @@ def run(config: dict, pipeline: dict) -> dict:
     Returns
     -------
     dict
-        Updated pipeline with a ``dependencies`` key added/modified.
+        Updated pipeline with a ``descriptions`` key added/modified.
     """
-    pipeline.setdefault("dependencies", {})
+    pipeline.setdefault("descriptions", {})
     return pipeline
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run the Dependencies pipeline stage")
+    parser = argparse.ArgumentParser(description="Run the Descriptions pipeline stage")
     parser.add_argument("config", help="Path to config YAML file")
     parser.add_argument("pipeline", help="Path to pipeline YAML file")
     parser.add_argument("-o", "--output", help="Output YAML path (default: overwrite pipeline)")

@@ -2,3 +2,5 @@
 __pycache__/
 .claude/worktrees/
 .claude/scheduled-tasks/
+assets/settings.yaml
+assets/llm_accounts.yaml

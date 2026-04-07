@@ -2,15 +2,19 @@ from pathlib import Path
 
 from nicegui import ui
 
-from utils import save_json_as_yaml, load_yaml_as_json
+from utils import Settings, save_json_as_yaml, load_yaml_as_json
 
 # ---------------------------------------------------------------------------
 # LLM Account Settings Page
 # ---------------------------------------------------------------------------
-# Stores up to 6 LLM provider accounts.  Each account is represented as a
-# horizontal strip that starts grey ("Set Account") and turns green once
-# configured.  A radio-style checkbox group selects the *active* account.
-# Settings are persisted to assets/llm_accounts.yaml.
+# Stores up to 6 LLM provider accounts.  The user picks one as "active";
+# that account's details are written into the shared Settings object so
+# every agent stage can use it.
+#
+# The accounts roster is kept in a separate file (assets/llm_accounts.yaml)
+# because it holds *all* slots, while Settings.llm only holds the *active*
+# account.  On OK / delete / checkbox change we sync the active account
+# into the Settings object and persist both files.
 # ---------------------------------------------------------------------------
 
 PROVIDER_OPTIONS = [
@@ -24,7 +28,7 @@ PROVIDER_OPTIONS = [
 
 NUM_SLOTS = 6
 
-_SETTINGS_FILE = Path(__file__).resolve().parents[2] / "assets" / "llm_accounts.yaml"
+_ACCOUNTS_FILE = Path(__file__).resolve().parents[2] / "assets" / "llm_accounts.yaml"
 
 _ACCOUNT_KEYS = [
     "provider", "account_name", "api_key", "base_url", "model",
@@ -38,11 +42,11 @@ def _make_empty_account():
     return {k: "" for k in _ACCOUNT_KEYS}
 
 
-def _load_settings():
+def _load_accounts():
     """Load accounts and active index from disk. Returns (accounts, active_index)."""
-    if _SETTINGS_FILE.is_file():
+    if _ACCOUNTS_FILE.is_file():
         try:
-            data = load_yaml_as_json(_SETTINGS_FILE)
+            data = load_yaml_as_json(_ACCOUNTS_FILE)
             saved = data.get("accounts", [])
             accounts = []
             for i in range(NUM_SLOTS):
@@ -57,16 +61,28 @@ def _load_settings():
     return [_make_empty_account() for _ in range(NUM_SLOTS)], None
 
 
-def _save_settings(accounts, active_index):
-    """Persist accounts and active index to disk."""
+def _save_accounts(accounts, active_index):
+    """Persist the full accounts roster to disk."""
     data = {"accounts": accounts, "active_index": active_index}
-    save_json_as_yaml(data, _SETTINGS_FILE)
+    save_json_as_yaml(data, _ACCOUNTS_FILE)
 
 
-def render(container):
+def _sync_settings(settings_obj: Settings, accounts, active_index):
+    """Push the active LLM account into the Settings object and persist."""
+    idx = active_index["value"]
+    if idx is not None and accounts[idx]["provider"]:
+        settings_obj.clear_llm_account()
+        settings_obj.set_llm_account(**accounts[idx])
+    else:
+        settings_obj.clear_llm_account()
+    settings_obj.save()
+
+
+def render(container, settings_obj: Settings):
     # -- local state (loaded from disk) -------------------------------------
-    accounts, _saved_active = _load_settings()
+    accounts, _saved_active = _load_accounts()
     active_index = {"value": _saved_active}  # which slot is the active LLM account
+    _sync_settings(settings_obj, accounts, active_index)
 
     # references to dynamic UI elements per slot
     strip_refs = []   # the coloured strip element
@@ -223,7 +239,8 @@ def render(container):
                     acct["azure_deployment"] = azure_deployment_input.value or ""
                     acct["azure_api_version"] = azure_version_input.value or ""
                     _refresh_strip(idx)
-                    _save_settings(accounts, active_index["value"])
+                    _save_accounts(accounts, active_index["value"])
+                    _sync_settings(settings_obj, accounts, active_index)
                     dlg.close()
 
                 ui.button("OK", on_click=_on_ok).props("unelevated color=primary")
@@ -235,7 +252,8 @@ def render(container):
     def _delete_account(idx):
         accounts[idx] = _make_empty_account()
         _refresh_strip(idx)
-        _save_settings(accounts, active_index["value"])
+        _save_accounts(accounts, active_index["value"])
+        _sync_settings(settings_obj, accounts, active_index)
 
     # -- build the UI -------------------------------------------------------
 
@@ -260,7 +278,8 @@ def render(container):
                     else:
                         if active_index["value"] == slot:
                             active_index["value"] = None
-                    _save_settings(accounts, active_index["value"])
+                    _save_accounts(accounts, active_index["value"])
+                    _sync_settings(settings_obj, accounts, active_index)
 
                 cb.on("update:model-value", _on_cb_change)
                 cb_refs.append(cb)
