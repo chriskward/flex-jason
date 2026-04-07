@@ -240,7 +240,7 @@ def render(container):
     # -- build the UI -------------------------------------------------------
 
     with container:
-        ui.label("Settings").classes("text-h4 q-pa-md")
+        pass  # page title shown in top bar
 
         for i in range(NUM_SLOTS):
             with ui.row().classes("w-full items-center q-px-md q-py-xs gap-2").style(
