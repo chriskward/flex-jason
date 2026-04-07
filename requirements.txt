@@ -37,7 +37,13 @@ Pygments==2.20.0
 python-engineio==4.13.1
 python-multipart==0.0.24
 python-socketio==5.16.1
+PyQt6==6.11.0
+PyQt6-Qt6==6.11.0
+PyQt6-WebEngine==6.11.0
+PyQt6-WebEngine-Qt6==6.11.0
+PyQt6_sip==13.11.1
 pywebview==6.1
+QtPy==2.4.3
 PyYAML==6.0.3
 simple-websocket==1.1.0
 starlette==1.0.0
