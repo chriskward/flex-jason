@@ -1,7 +1,7 @@
 from nicegui import ui
 from pathlib import Path
 
-from pages import filemgr, datasets, variables, derivations, codegen, englishgen, settings
+from pages import filemgr, datasets, variables, dependencies, derivations, codegen, englishgen, settings
 
 # -- shared pipeline state ------------------------------------------------
 # Each stage reads from / writes to this dict.  Because NiceGUI runs in a
@@ -16,7 +16,8 @@ NAV_ITEMS = [
     {"key": "filemgr",      "label": "File Manager",    "icon": "create_new_folder"},
     {"key": "datasets",     "label": "Datasets",        "icon": "library_books"},
     # --- divider ---
-    {"key": "variables",    "label": "Variables",        "icon": "data_object"},
+    {"key": "variables",     "label": "Variables",        "icon": "data_object"},
+    {"key": "dependencies", "label": "Dependencies",     "icon": "share"},
     {"key": "derivations",  "label": "Derivations",     "icon": "account_tree"},
     # --- divider ---
     {"key": "codegen",      "label": "Code Generation", "icon": "code"},
@@ -26,14 +27,15 @@ NAV_ITEMS = [
 ]
 
 # indices after which a divider is drawn (0-based)
-DIVIDER_AFTER = {1, 4, 6}
+DIVIDER_AFTER = {1, 5, 7}
 
 # -- page renderers mapped by nav key ------------------------------------
 PAGE_RENDERERS = {
     "filemgr":      lambda c: filemgr.render(c, pipeline),
     "datasets":     lambda c: datasets.render(c),
-    "variables":    lambda c: variables.render(c),
-    "derivations":  lambda c: derivations.render(c),
+    "variables":     lambda c: variables.render(c),
+    "dependencies":  lambda c: dependencies.render(c),
+    "derivations":   lambda c: derivations.render(c),
     "codegen":      lambda c: codegen.render(c),
     "descriptions": lambda c: englishgen.render(c),
     "settings":     lambda c: settings.render(c),
