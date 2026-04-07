@@ -1,7 +1,8 @@
-import json
 from pathlib import Path
 
 from nicegui import ui
+
+from utils import save_json_as_yaml, load_yaml_as_json
 
 # ---------------------------------------------------------------------------
 # LLM Account Settings Page
@@ -9,7 +10,7 @@ from nicegui import ui
 # Stores up to 6 LLM provider accounts.  Each account is represented as a
 # horizontal strip that starts grey ("Set Account") and turns green once
 # configured.  A radio-style checkbox group selects the *active* account.
-# Settings are persisted to assets/llm_accounts.json.
+# Settings are persisted to assets/llm_accounts.yaml.
 # ---------------------------------------------------------------------------
 
 PROVIDER_OPTIONS = [
@@ -23,7 +24,7 @@ PROVIDER_OPTIONS = [
 
 NUM_SLOTS = 6
 
-_SETTINGS_FILE = Path(__file__).resolve().parents[2] / "assets" / "llm_accounts.json"
+_SETTINGS_FILE = Path(__file__).resolve().parents[2] / "assets" / "llm_accounts.yaml"
 
 _ACCOUNT_KEYS = [
     "provider", "account_name", "api_key", "base_url", "model",
@@ -41,7 +42,7 @@ def _load_settings():
     """Load accounts and active index from disk. Returns (accounts, active_index)."""
     if _SETTINGS_FILE.is_file():
         try:
-            data = json.loads(_SETTINGS_FILE.read_text(encoding="utf-8"))
+            data = load_yaml_as_json(_SETTINGS_FILE)
             saved = data.get("accounts", [])
             accounts = []
             for i in range(NUM_SLOTS):
@@ -51,7 +52,7 @@ def _load_settings():
                         acct[k] = saved[i].get(k, "")
                 accounts.append(acct)
             return accounts, data.get("active_index", None)
-        except (json.JSONDecodeError, TypeError, KeyError):
+        except (TypeError, KeyError):
             pass
     return [_make_empty_account() for _ in range(NUM_SLOTS)], None
 
@@ -59,7 +60,7 @@ def _load_settings():
 def _save_settings(accounts, active_index):
     """Persist accounts and active index to disk."""
     data = {"accounts": accounts, "active_index": active_index}
-    _SETTINGS_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    save_json_as_yaml(data, _SETTINGS_FILE)
 
 
 def render(container):

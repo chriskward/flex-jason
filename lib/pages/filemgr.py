@@ -15,6 +15,14 @@ def _file_icon(path: str) -> tuple[str, str]:
         return 'picture_as_pdf', 'text-red-7'
     if ext == '.md':
         return 'article', 'text-blue-7'
+    if ext in ('.yaml', '.yml'):
+        return 'data_object', 'text-amber-8'
+    if ext == '.json':
+        return 'code', 'text-orange-7'
+    if ext == '.txt':
+        return 'description', 'text-grey-7'
+    if ext == '.csv':
+        return 'grid_on', 'text-teal-7'
     return 'insert_drive_file', 'text-grey-7'
 
 
@@ -26,10 +34,14 @@ def _open_file_dialog() -> str:
     path = filedialog.askopenfilename(
         title='Select a file',
         filetypes=[
-            ('Supported files', '*.xlsx *.xls *.pdf *.md'),
+            ('Supported files', '*.xlsx *.xls *.pdf *.md *.yaml *.yml *.json *.txt *.csv'),
             ('Excel files', '*.xlsx *.xls'),
             ('PDF files', '*.pdf'),
             ('Markdown files', '*.md'),
+            ('YAML files', '*.yaml *.yml'),
+            ('JSON files', '*.json'),
+            ('Text files', '*.txt'),
+            ('CSV files', '*.csv'),
             ('All files', '*.*'),
         ],
     )
